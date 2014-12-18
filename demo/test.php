@@ -6,16 +6,12 @@ use Gregwar\CAM\Planifier;
 use Gregwar\CAM\Planning;
 use Gregwar\CAM\Task;
 
-$planning = new Planning(new \DateTime, 15*60);
+$planning = new Planning();
+$planning->setPrecision(15*60);
 $planning->initialize(15);
 
-$working = $planning->getTimeSpans(1873, false, 'Tache 1');
+var_dump($planning->allocate(1873, true, 'Tache 1'));
 
 $planning->clean();
-$planning->dump();
 
-/*
-$planner = new Planifier;
-$planner
-    ->addTask(new Task(
-*/
+$planning->dump();
