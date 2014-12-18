@@ -143,7 +143,7 @@ class Planning
     }
 
     /**
-     * Gets a new timespan
+     * Allocates spans to the planning
      *
      * @param $duration the duration required
      * @param $contiguous if you want it to be contiguous
@@ -165,6 +165,7 @@ class Planning
             } else {
                 if (!$contiguous || $span->duration() >= $duration) {
                     // Breaking a span in parts
+                    $duration = 0;
                     list($start, $end) = $span->reduce($duration);
                     $spans[] = new TimeSpan($start, $end, $data);
                     if ($span->duration() <= 0) {
