@@ -20,8 +20,30 @@ class Planning
     public function initialize($days = 30)
     {
         $base = $this->startDate->format('d-m-Y');
+        $startTs = $this->startDate->getTimestamp();
+
         for ($day=0; $day<$days; $day++) {
+            // Gets spans for a day
             $spans = $this->spansForDay(new \DateTime($base.'+'.$day.'days 00:00'));
+
+            // Truncating spans of the past
+            $toDelete = array();
+            foreach ($spans as $index => $span) {
+                $start = $span->getStart()->getTimestamp();
+                $end = $span->getEnd()->getTimestamp();
+                if ($end <= $startTs) {
+                    $toDelete[] = $index;
+                } else {
+                    if ($start <= $startTs) {
+                        $span->reduce(abs($startTs-$start));
+                    }
+                }
+            }
+            foreach ($toDelete as $index) {
+                unset($spans[$index]);
+            }
+
+            // Adding spans
             foreach ($spans as $span) {
                 $this->spans[] = $span;
             }
@@ -57,26 +79,10 @@ class Planning
         $h = function($hour) use ($date) {
             return new \DateTime($date.' '.$hour);
         };
+
         if ($dow < 6) {
             $spans[] = new EmptyTimeSpan($h('08:00'), $h('12:00'));
-            $spans[] = new EmptyTimeSpan($h('14:00'), $h('22:00'));
-        }
-
-        $toDelete = array();
-        $startTs = $this->startDate->getTimestamp();
-        foreach ($spans as $index => $span) {
-            $start = $span->getStart()->getTimestamp();
-            $end = $span->getEnd()->getTimestamp();
-            if ($end <= $startTs) {
-                $toDelete[] = $index;
-            } else {
-                if ($start <= $startTs) {
-                    $span->reduce(abs($startTs-$start));
-                }
-            }
-        }
-        foreach ($toDelete as $index) {
-            unset($spans[$index]);
+            $spans[] = new EmptyTimeSpan($h('14:00'), $h('19:00'));
         }
 
         return $spans;
@@ -101,13 +107,15 @@ class Planning
                 $duration -= $span->duration();
                 $spans[] = new TimeSpan($span->getStart(), $span->getEnd(), $data);
             } else {
-                // Breaking a span in parts
-                list($start, $end) = $span->reduce($duration);
-                $spans[] = new TimeSpan($start, $end, $data);
-                if ($span->duration() <= 0) {
-                    $toDelete[] = $index;
+                if (!$contiguous || $span->duration() >= $duration) {
+                    // Breaking a span in parts
+                    list($start, $end) = $span->reduce($duration);
+                    $spans[] = new TimeSpan($start, $end, $data);
+                    if ($span->duration() <= 0) {
+                        $toDelete[] = $index;
+                    }
+                    break;
                 }
-                break;
             }
         }
 

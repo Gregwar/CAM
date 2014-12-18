@@ -7,11 +7,9 @@ use Gregwar\CAM\Planning;
 use Gregwar\CAM\Task;
 
 $planning = new Planning;
-$planning->initialize(3);
-$planning->dump();
-exit();
+$planning->initialize(15);
 
-$working = $planning->getTimeSpans(10, false, 'Test');
+$working = $planning->getTimeSpans(3*60*60, true, 'Tache 1');
 
 $planning->clean();
 $planning->dump();
