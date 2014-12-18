@@ -9,7 +9,7 @@ class Planning
 
     public function __construct($startDate = null)
     {
-        $this->startDate = $startDate ?: new \DateTime('today 00:00');
+        $this->startDate = $startDate ?: new \DateTime;
     }
 
     /**
@@ -19,8 +19,9 @@ class Planning
      */
     public function initialize($days = 30)
     {
+        $base = $this->startDate->format('d-m-Y');
         for ($day=0; $day<$days; $day++) {
-            $spans = $this->spansForDay(new \DateTime('+'.$day.'days 00:00'));
+            $spans = $this->spansForDay(new \DateTime($base.'+'.$day.'days 00:00'));
             foreach ($spans as $span) {
                 $this->spans[] = $span;
             }
@@ -58,7 +59,24 @@ class Planning
         };
         if ($dow < 6) {
             $spans[] = new EmptyTimeSpan($h('08:00'), $h('12:00'));
-            $spans[] = new EmptyTimeSpan($h('14:00'), $h('18:00'));
+            $spans[] = new EmptyTimeSpan($h('14:00'), $h('22:00'));
+        }
+
+        $toDelete = array();
+        $startTs = $this->startDate->getTimestamp();
+        foreach ($spans as $index => $span) {
+            $start = $span->getStart()->getTimestamp();
+            $end = $span->getEnd()->getTimestamp();
+            if ($end <= $startTs) {
+                $toDelete[] = $index;
+            } else {
+                if ($start <= $startTs) {
+                    $span->reduce(abs($startTs-$start));
+                }
+            }
+        }
+        foreach ($toDelete as $index) {
+            unset($spans[$index]);
         }
 
         return $spans;
