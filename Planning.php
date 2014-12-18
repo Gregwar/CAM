@@ -6,10 +6,34 @@ class Planning
 {
     protected $timeSpans = array();
     protected $startDate = null;
+    protected $precision;
 
-    public function __construct($startDate = null)
+    public function __construct($startDate = null, $precision = 1)
     {
         $this->startDate = $startDate ?: new \DateTime;
+        $this->precision = $precision;
+    }
+
+    /**
+     * Sets the starting date
+     *
+     * @param $startDate the starting date of the planning
+     */
+    public function setStartDate(\DateTime $startDate)
+    {
+        $this->startDate = $startDate;
+    }
+
+    /**
+     * Sets the plannin precision
+     *
+     * @param $precision the precision in seconds
+     */
+    public function setPrecision($precision)
+    {
+        $this->precision = $precision;
+
+        return $this;
     }
 
     /**
@@ -79,7 +103,7 @@ class Planning
             // Default working hours
             return array(
                 array('08:00', '12:30'),
-                array('14:00', '18:00'),
+                array('14:00', '19:30'),
             );
         } else {
             return array();
@@ -111,6 +135,14 @@ class Planning
     }
 
     /**
+     * Align a value to the precision
+     */
+    protected function align($value)
+    {
+        return ceil($value/$this->precision)*$this->precision;
+    }
+
+    /**
      * Gets a new timespan
      *
      * @param $duration the duration required
@@ -121,12 +153,14 @@ class Planning
     {
         $spans = array();
         $toDelete = array();
+        $duration = $this->align($duration);
 
         foreach ($this->spans as $index => $span) {
             if (!$contiguous && $span->duration() < $duration) {
                 // Taking a whole span
                 $toDelete[] = $index;
                 $duration -= $span->duration();
+                $duration = $this->align($duration);
                 $spans[] = new TimeSpan($span->getStart(), $span->getEnd(), $data);
             } else {
                 if (!$contiguous || $span->duration() >= $duration) {
