@@ -149,7 +149,7 @@ class Planning
      * @param $contiguous if you want it to be contiguous
      * @return an array with all spans
      */
-    public function getTimeSpans($duration, $contiguous = false, $data = null)
+    public function allocate($duration, $contiguous = false, $data = null)
     {
         $spans = array();
         $toDelete = array();
