@@ -25,8 +25,22 @@ class Planning
                 $this->spans[] = $span;
             }
         }
+    }
 
-        foreach ($this->spans as $span) echo $span."\n";
+    /**
+     * Cleans all the empty time span
+     */
+    public function clean()
+    {
+        $toDelete = array();
+        foreach ($this->spans as $index => $span) {
+            if ($span instanceof EmptyTimeSpan) {
+                $toDelete[] = $index;
+            }
+        }
+        foreach ($toDelete as $index) {
+            unset($this->spans[$index]);
+        }
     }
 
     /**
@@ -50,8 +64,50 @@ class Planning
         return $spans;
     }
 
-    public function getTimeSpan($duration)
+    /**
+     * Gets a new timespan
+     *
+     * @param $duration the duration required
+     * @param $contiguous if you want it to be contiguous
+     * @return an array with all spans
+     */
+    public function getTimeSpans($duration, $contiguous = false, $data = null)
     {
+        $spans = array();
+        $toDelete = array();
 
+        foreach ($this->spans as $index => $span) {
+            if (!$contiguous && $span->duration() < $duration) {
+                // Taking a whole span
+                $toDelete[] = $index;
+                $duration -= $span->duration();
+                $spans[] = new TimeSpan($span->getStart(), $span->getEnd(), $data);
+            } else {
+                // Breaking a span in parts
+                list($start, $end) = $span->reduce($duration);
+                $spans[] = new TimeSpan($start, $end, $data);
+                if ($span->duration() <= 0) {
+                    $toDelete[] = $index;
+                }
+                break;
+            }
+        }
+
+        // Removing useless spans
+        foreach ($toDelete as $index) {
+            unset($this->spans[$index]);
+        }
+
+        // Adding spans to the planning
+        foreach ($spans as $span) {
+            $this->spans[] = $span;
+        }
+
+        return $spans;
+    }
+
+    public function dump()
+    {
+        foreach ($this->spans as $span) echo $span."\n";
     }
 }
