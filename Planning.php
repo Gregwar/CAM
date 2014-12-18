@@ -67,6 +67,26 @@ class Planning
     }
 
     /**
+     * Working hours for a day
+     *
+     * @param DateTime the day
+     * @return The work hours for this day
+     */
+    protected function workHours(\DateTime $day)
+    {
+        // We work all days except saturday and sunday
+        if ($day->format('N')<6) {
+            // Default working hours
+            return array(
+                array('08:00', '12:30'),
+                array('14:00', '18:00'),
+            );
+        } else {
+            return array();
+        }
+    }
+
+    /**
      * This creates spans for a given day, the default logics here fills
      * the week day
      */
@@ -74,15 +94,17 @@ class Planning
     {
         $spans = array();
 
-        $dow = $day->format('N');
+        $hours = $this->workHours($day);
         $date = $day->format('d-m-Y');
         $h = function($hour) use ($date) {
             return new \DateTime($date.' '.$hour);
         };
 
-        if ($dow < 6) {
-            $spans[] = new EmptyTimeSpan($h('08:00'), $h('12:00'));
-            $spans[] = new EmptyTimeSpan($h('14:00'), $h('19:00'));
+        foreach ($hours as $startEnd) {
+            $start = new \DateTime($date.' '.$startEnd[0]);
+            $end = new \DateTime($date.' '.$startEnd[1]);
+
+            $spans[] = new EmptyTimeSpan($start, $end);
         }
 
         return $spans;
