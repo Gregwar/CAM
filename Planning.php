@@ -88,6 +88,10 @@ class Planning
         foreach ($toDelete as $index) {
             unset($this->spans[$index]);
         }
+
+        usort($this->spans, function($a, $b) {
+            return $a->getStart()->getTimestamp() - $b->getStart()->getTimestamp();
+        });
     }
 
     /**
@@ -151,6 +155,7 @@ class Planning
      */
     public function allocate($duration, $contiguous = false, $data = null)
     {
+        $save = serialize($this->spans);
         $spans = array();
         $toDelete = array();
         $duration = $this->align($duration);
@@ -165,15 +170,20 @@ class Planning
             } else {
                 if (!$contiguous || $span->duration() >= $duration) {
                     // Breaking a span in parts
-                    $duration = 0;
                     list($start, $end) = $span->reduce($duration);
                     $spans[] = new TimeSpan($start, $end, $data);
                     if ($span->duration() <= 0) {
                         $toDelete[] = $index;
                     }
+                    $duration = 0;
                     break;
                 }
             }
+        }
+
+        if ($duration > 0) {
+            $this->spans = unserialize($save);
+            throw new \Exception('Unable to allocate required span');
         }
 
         // Removing useless spans

@@ -10,7 +10,8 @@ $planning = new Planning();
 $planning->setPrecision(15*60);
 $planning->initialize(15);
 
-var_dump($planning->allocate(1873, true, 'Tache 1'));
+// $planning->allocate(1873, true, 'Tache 1');
+$planning->allocate(197300, true, 'Tache 2');
 
 $planning->clean();
 
