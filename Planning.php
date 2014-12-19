@@ -6,12 +6,10 @@ class Planning
 {
     protected $timeSpans = array();
     protected $startDate = null;
-    protected $precision;
 
-    public function __construct($startDate = null, $precision = 1)
+    public function __construct($startDate = null)
     {
         $this->startDate = $startDate ?: new \DateTime;
-        $this->precision = $precision;
     }
 
     /**
@@ -22,18 +20,6 @@ class Planning
     public function setStartDate(\DateTime $startDate)
     {
         $this->startDate = $startDate;
-    }
-
-    /**
-     * Sets the plannin precision
-     *
-     * @param $precision the precision in seconds
-     */
-    public function setPrecision($precision)
-    {
-        $this->precision = $precision;
-
-        return $this;
     }
 
     /**
@@ -139,14 +125,6 @@ class Planning
     }
 
     /**
-     * Align a value to the precision
-     */
-    protected function align($value)
-    {
-        return ceil($value/$this->precision)*$this->precision;
-    }
-
-    /**
      * Allocates spans to the planning
      *
      * @param $duration the duration required
@@ -158,14 +136,12 @@ class Planning
         $save = serialize($this->spans);
         $spans = array();
         $toDelete = array();
-        $duration = $this->align($duration);
 
         foreach ($this->spans as $index => $span) {
             if (!$contiguous && $span->duration() < $duration) {
                 // Taking a whole span
                 $toDelete[] = $index;
                 $duration -= $span->duration();
-                $duration = $this->align($duration);
                 $spans[] = new TimeSpan($span->getStart(), $span->getEnd(), $data);
             } else {
                 if (!$contiguous || $span->duration() >= $duration) {
