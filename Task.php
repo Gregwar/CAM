@@ -13,12 +13,6 @@ abstract class Task
         $this->duration = $duration;
     }
 
-    public function place(Planifier $planifier)
-    {
-        $planning = $planifier->getPlanning();
-
-    }
-
     public function __toString()
     {
         return 'Task '.$this->name.' duration: '.$this->duration;
