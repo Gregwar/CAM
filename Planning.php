@@ -103,6 +103,8 @@ class Planning
     /**
      * This creates spans for a given day, the default logics here fills
      * the week day
+     *
+     * @return An array of TimeSpan (emptys)
      */
     protected function spansForDay(\DateTime $day)
     {
@@ -173,6 +175,16 @@ class Planning
         }
 
         return $spans;
+    }
+
+    /**
+     * Get the spans
+     *
+     * @return an array of TimeSpan
+     */
+    public function getSpans()
+    {
+        return $this->spans;
     }
 
     public function dump()
