@@ -1,6 +1,6 @@
 <?php
 
-namespace Gregwar\CAM;
+namespace Gregwar\Planning;
 
 class Planning
 {

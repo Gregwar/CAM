@@ -6,10 +6,10 @@ if (file_exists($vendors)) {
 }
 
 /**
-* Registers an autoload for all the classes in Gregwar\CAM
+* Registers an autoload for all the classes in Gregwar\Planning
 */
 spl_autoload_register(function ($className) {
-    $namespace = 'Gregwar\\CAM';
+    $namespace = 'Gregwar\\Planning';
 
     if (strpos($className, $namespace) === 0) {
         $className = str_replace($namespace, '', $className);
