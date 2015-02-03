@@ -2,7 +2,6 @@
 
 include(__DIR__.'/../autoload.php');
 
-use Gregwar\Planning\Planifier;
 use Gregwar\Planning\Planning;
 use Gregwar\Planning\Task;
 
