@@ -129,7 +129,7 @@ class Planning
     /**
      * Adds a timespan
      */
-    public function addSpan(\TimeSpan $span)
+    public function addSpan(TimeSpan $span)
     {
         $this->spans[] = $span;
     }
