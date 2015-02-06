@@ -199,6 +199,29 @@ class Planning
         return $this->spans;
     }
 
+    /**
+     * Get all the spans that are between a given interval
+     */
+    public function getSpansBetween(\DateTime $start, \DateTime $end)
+    {
+        $matches = array();
+        foreach ($this->spans as $span) {
+            if ($span->isBetween($start, $end)) {
+                $matches[] = $span;
+            }
+        }
+
+        return $matches;
+    }
+    
+    /**
+     * Get all the spans that are between a given interval
+     */
+    public function getSpansInside(\TimeSpan $span)
+    {
+        return $this->getSpansBetween($span->getStart(), $span->getEnd());
+    }
+
     public function dump()
     {
         foreach ($this->spans as $span) echo $span."\n";

@@ -65,6 +65,23 @@ class TimeSpan
     }
 
     /**
+     * Tell if the span is between two dates
+     */
+    public function isBetween(\DateTime $start, \DateTime $end)
+    {
+        return ($this->start->getTimestamp() >= $start->getTimestamp())
+            && ($this->end->getTimestamp() <= $end->getTimestamp());
+    }
+
+    /**
+     * Tells if the span is inside another span
+     */
+    public function isInside(\TimeSpan $span)
+    {
+        return $this->isBetween($span->getStart(), $span->getEnd());
+    }
+
+    /**
      * Reduces this timspan by $duration
      *
      * @param the duration that should be reduced
