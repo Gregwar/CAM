@@ -217,7 +217,7 @@ class Planning
     /**
      * Get all the spans that are between a given interval
      */
-    public function getSpansInside(\TimeSpan $span)
+    public function getSpansInside(TimeSpan $span)
     {
         return $this->getSpansBetween($span->getStart(), $span->getEnd());
     }

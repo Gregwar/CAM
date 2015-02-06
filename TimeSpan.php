@@ -76,7 +76,7 @@ class TimeSpan
     /**
      * Tells if the span is inside another span
      */
-    public function isInside(\TimeSpan $span)
+    public function isInside(TimeSpan $span)
     {
         return $this->isBetween($span->getStart(), $span->getEnd());
     }
