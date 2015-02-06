@@ -127,6 +127,14 @@ class Planning
     }
 
     /**
+     * Adds a timespan
+     */
+    public function addSpan(\TimeSpan $span)
+    {
+        $this->spans[] = $span;
+    }
+
+    /**
      * Allocates spans to the planning
      *
      * @param $duration the duration required
