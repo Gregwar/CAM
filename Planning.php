@@ -174,7 +174,11 @@ class Planning
             $this->spans[] = $span;
         }
 
-        return $spans;
+        if ($contiguous) {
+            return $spans[0];
+        } else {
+            return $spans;
+        }
     }
 
     /**
