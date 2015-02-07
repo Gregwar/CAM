@@ -4,7 +4,7 @@ namespace Gregwar\Planning;
 
 class Planning
 {
-    protected $timeSpans = array();
+    protected $spans = array();
     protected $startDate = null;
 
     public function __construct($startDate = null)
