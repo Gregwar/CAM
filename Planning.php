@@ -148,21 +148,23 @@ class Planning
         $toDelete = array();
 
         foreach ($this->spans as $index => $span) {
-            if (!$contiguous && $span->duration() < $duration) {
-                // Taking a whole span
-                $toDelete[] = $index;
-                $duration -= $span->duration();
-                $spans[] = new TimeSpan($span->getStart(), $span->getEnd(), $data);
-            } else {
-                if (!$contiguous || $span->duration() >= $duration) {
-                    // Breaking a span in parts
-                    list($start, $end) = $span->reduce($duration);
-                    $spans[] = new TimeSpan($start, $end, $data);
-                    if ($span->duration() <= 0) {
-                        $toDelete[] = $index;
+            if ($span instanceof EmptyTimeSpan) {
+                if (!$contiguous && $span->duration() < $duration) {
+                    // Taking a whole span
+                    $toDelete[] = $index;
+                    $duration -= $span->duration();
+                    $spans[] = new TimeSpan($span->getStart(), $span->getEnd(), $data);
+                } else {
+                    if (!$contiguous || $span->duration() >= $duration) {
+                        // Breaking a span in parts
+                        list($start, $end) = $span->reduce($duration);
+                        $spans[] = new TimeSpan($start, $end, $data);
+                        if ($span->duration() <= 0) {
+                            $toDelete[] = $index;
+                        }
+                        $duration = 0;
+                        break;
                     }
-                    $duration = 0;
-                    break;
                 }
             }
         }
