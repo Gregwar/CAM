@@ -139,16 +139,18 @@ class Planning
      *
      * @param $duration the duration required
      * @param $contiguous if you want it to be contiguous
+     * @param $data some data that will be assigned to the span
+     * @param $callback, a callback that can check whether a span can be used
      * @return an array with all spans
      */
-    public function allocate($duration, $contiguous = false, $data = null)
+    public function allocate($duration, $contiguous = false, $data = null, $callback = null)
     {
         $save = serialize($this->spans);
         $spans = array();
         $toDelete = array();
 
         foreach ($this->spans as $index => $span) {
-            if ($span instanceof EmptyTimeSpan) {
+            if ($span instanceof EmptyTimeSpan && ($callback === null || $callback($span))) {
                 if (!$contiguous && $span->duration() < $duration) {
                     // Taking a whole span
                     $toDelete[] = $index;
