@@ -140,33 +140,64 @@ class Planning
      * @param $duration the duration required
      * @param $contiguous if you want it to be contiguous
      * @param $data some data that will be assigned to the span
-     * @param $callback, a callback that can check whether a span can be used
+     * @param $callback, a callback that will be invoked w
      * @return an array with all spans
      */
-    public function allocate($duration, $contiguous = false, $data = null, $callback = null)
+    public function allocate($duration, $contiguous = false, $data = null, $priority = null)
     {
         $save = serialize($this->spans);
+        $emptySpans = array();
         $spans = array();
         $toDelete = array();
 
+        // Get the priority of each free span
         foreach ($this->spans as $index => $span) {
-            if ($span instanceof EmptyTimeSpan && ($callback === null || $callback($span))) {
-                if (!$contiguous && $span->duration() < $duration) {
-                    // Taking a whole span
-                    $toDelete[] = $index;
-                    $duration -= $span->duration();
-                    $spans[] = new TimeSpan($span->getStart(), $span->getEnd(), $data);
-                } else {
-                    if (!$contiguous || $span->duration() >= $duration) {
-                        // Breaking a span in parts
-                        list($start, $end) = $span->reduce($duration);
-                        $spans[] = new TimeSpan($start, $end, $data);
-                        if ($span->duration() <= 0) {
-                            $toDelete[] = $index;
-                        }
-                        $duration = 0;
-                        break;
+            if ($span instanceof EmptyTimeSpan) {
+                $p = 0;
+
+                if ($priority !== null) {
+                    $p = $priority($span);
+                }
+
+                if ($p !== false) {
+                    $emptySpans[] = array($p, $index);
+                }
+            }
+        }
+
+        // Sorting the spans by priority
+        $allSpans = $this->spans;
+        usort($emptySpans, function($span1, $span2) use ($allSpans) {
+            list($p1, $i1) = $span1;
+            list($p2, $i2) = $span2;
+
+            if ($p1 == $p2) {
+                return $allSpans[$i1]->getStart()->getTimestamp()
+                    - $allSpans[$i2]->getStart()->getTimestamp();
+            } else {
+                return $p2-$p1;
+            }
+        });
+
+        // Trying to fill these spans
+        foreach ($emptySpans as $entry) {
+            $index = $entry[1];
+            $span = $this->spans[$index];
+            if (!$contiguous && $span->duration() < $duration) {
+                // Taking a whole span
+                $toDelete[] = $index;
+                $duration -= $span->duration();
+                $spans[] = new TimeSpan($span->getStart(), $span->getEnd(), $data);
+            } else {
+                if (!$contiguous || $span->duration() >= $duration) {
+                    // Breaking a span in parts
+                    list($start, $end) = $span->reduce($duration);
+                    $spans[] = new TimeSpan($start, $end, $data);
+                    if ($span->duration() <= 0) {
+                        $toDelete[] = $index;
                     }
+                    $duration = 0;
+                    break;
                 }
             }
         }
@@ -211,23 +242,23 @@ class Planning
         $matches = array();
         foreach ($this->spans as $span) {
             if ($span->isBetween($start, $end)) {
-                $matches[] = $span;
-            }
+            $matches[] = $span;
         }
-
-        return $matches;
-    }
-    
-    /**
-     * Get all the spans that are between a given interval
-     */
-    public function getSpansInside(TimeSpan $span)
-    {
-        return $this->getSpansBetween($span->getStart(), $span->getEnd());
     }
 
-    public function dump()
-    {
-        foreach ($this->spans as $span) echo $span."\n";
-    }
+    return $matches;
+}
+
+/**
+ * Get all the spans that are between a given interval
+ */
+public function getSpansInside(TimeSpan $span)
+{
+    return $this->getSpansBetween($span->getStart(), $span->getEnd());
+}
+
+public function dump()
+{
+    foreach ($this->spans as $span) echo $span."\n";
+}
 }
